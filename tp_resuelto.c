@@ -91,7 +91,7 @@ static int largo(char* s) {
 char* strDuplicate(char* src) {
     int n = largo(src);
     // n + 1 para que entre el '\0' final
-    char* copia = malloc(n + 1);
+    char* copia = (char*)malloc(sizeof(char) * (n + 1));
     if (copia == NULL) return NULL;
     // copiamos hasta n inclusive, asi el terminador viaja con el resto
     for (int i = 0; i <= n; i++) copia[i] = src[i];
@@ -114,7 +114,7 @@ int strCompare(char* s1, char* s2) {
 char* strConcatenate(char* src1, char* src2) {
     int n1 = largo(src1);
     int n2 = largo(src2);
-    char* res = malloc(n1 + n2 + 1);
+    char* res = (char*)malloc(sizeof(char) * (n1 + n2 + 1));
     // si el malloc falla no liberamos los originales: el que llama todavia los necesita
     if (res == NULL) return NULL;
     for (int i = 0; i < n1; i++) res[i] = src1[i];
@@ -128,7 +128,7 @@ char* strConcatenate(char* src1, char* src2) {
 
 // Reserva una fila con todas las celdas en 0. Devuelve NULL si malloc falla.
 static RowNode* crearFilaVacia() {
-    RowNode* fila = malloc(sizeof(RowNode));
+    RowNode* fila = (RowNode*)malloc(sizeof(RowNode));
     if (fila == NULL) return NULL;
     for (int c = 0; c < GRID_COLS; c++) fila->cells[c] = 0;
     fila->next = NULL;
@@ -139,7 +139,7 @@ static RowNode* crearFilaVacia() {
 void gameBoardDelete(GameBoard* board);
 
 GameBoard* gameBoardNew() {
-    GameBoard* board = malloc(sizeof(GameBoard));
+    GameBoard* board = (GameBoard*)malloc(sizeof(GameBoard));
     if (board == NULL) return NULL;
 
     board->first_row = NULL;
@@ -198,7 +198,7 @@ void gameBoardDelete(GameBoard* board) {
 }
 
 void gameBoardAddParticle(GameBoard* board, float x, float y, int color) {
-    ParticleNode* nueva = malloc(sizeof(ParticleNode));
+    ParticleNode* nueva = (ParticleNode*)malloc(sizeof(ParticleNode));
     // si no hay memoria perdemos una particula, que es solo un efecto visual: no vale la pena cortar el juego
     if (nueva == NULL) return;
 
@@ -272,7 +272,7 @@ int gameBoardCheckAndClearLines(GameBoard* board) {
 }
 
 void gameBoardEnqueuePiece(GameBoard* board, int type) {
-    PieceQueueNode* nodo = malloc(sizeof(PieceQueueNode));
+    PieceQueueNode* nodo = (PieceQueueNode*)malloc(sizeof(PieceQueueNode));
     if (nodo == NULL) return;
     nodo->type = type;
     nodo->next = NULL;
