@@ -92,7 +92,6 @@ char* strDuplicate(char* src) {
     int n = largo(src);
     // n + 1 para que entre el '\0' final
     char* copia = (char*)malloc(sizeof(char) * (n + 1));
-    if (copia == NULL) return NULL;
     // copiamos hasta n inclusive, asi el terminador viaja con el resto
     for (int i = 0; i <= n; i++) copia[i] = src[i];
     return copia;
@@ -115,8 +114,6 @@ char* strConcatenate(char* src1, char* src2) {
     int n1 = largo(src1);
     int n2 = largo(src2);
     char* res = (char*)malloc(sizeof(char) * (n1 + n2 + 1));
-    // si el malloc falla no liberamos los originales: el que llama todavia los necesita
-    if (res == NULL) return NULL;
     for (int i = 0; i < n1; i++) res[i] = src1[i];
     for (int i = 0; i <= n2; i++) res[n1 + i] = src2[i];   // <= para copiar el '\0'
     free(src1);
@@ -199,8 +196,6 @@ void gameBoardDelete(GameBoard* board) {
 
 void gameBoardAddParticle(GameBoard* board, float x, float y, int color) {
     ParticleNode* nueva = (ParticleNode*)malloc(sizeof(ParticleNode));
-    // si no hay memoria perdemos una particula, que es solo un efecto visual: no vale la pena cortar el juego
-    if (nueva == NULL) return;
 
     nueva->x = x;
     nueva->y = y;
@@ -273,7 +268,6 @@ int gameBoardCheckAndClearLines(GameBoard* board) {
 
 void gameBoardEnqueuePiece(GameBoard* board, int type) {
     PieceQueueNode* nodo = (PieceQueueNode*)malloc(sizeof(PieceQueueNode));
-    if (nodo == NULL) return;
     nodo->type = type;
     nodo->next = NULL;
 
