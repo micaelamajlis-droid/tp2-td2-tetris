@@ -1,7 +1,7 @@
-// TP2 - Tecnologia Digital II - Tetris con memoria dinamica
-// Integrantes: Esther Meta Phinhassoff, Micaela Majlis, Felicitas Robin, Delfina Mengochea
+// tp2 - tecnologia digital ii - tetris con memoria dinamica
+// integrantes: Esther Meta Phinhassoff, Micaela Majlis, Felicitas Robin, Delfina Mengochea
 //
-// Uso:  ./tetris           corre los tests y despues el juego
+// uso:  ./tetris           corre los tests y despues el juego
 //       ./tetris --test    corre solo los tests (valgrind --leak-check=full ./tetris --test)
 
 #include <SDL2/SDL.h>
@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-// ========= CONSTANTES DEL JUEGO =========
+// constantes del juego
 #define SCREEN_WIDTH 500
 #define SCREEN_HEIGHT 800
 #define GRID_ROWS 20
@@ -34,21 +34,21 @@ SDL_Color colors[8] = {
     {255, 255, 0, 255}, {0, 255, 0, 255}, {128, 0, 128, 255}, {255, 0, 0, 255}
 };
 
-// ========= ESTRUCTURAS DE DATOS =========
+// estructuras de datos
 
-// 1. Nodo para la fila del tablero (Lista Enlazada)
+// 1. nodo para la fila del tablero (lista enlazada)
 typedef struct RowNode {
     int cells[GRID_COLS]; 
     struct RowNode* next; 
 } RowNode;
 
-// 2. Nodo para la cola de próximas piezas (Queue)
+// 2. nodo para la cola de próximas piezas (queue)
 typedef struct PieceQueueNode {
     int type; 
     struct PieceQueueNode* next;
 } PieceQueueNode;
 
-// 3. Nodo para el sistema de partículas 
+// 3. nodo para el sistema de partículas
 typedef struct ParticleNode {
     float x, y;
     float vel_x, vel_y;
@@ -74,14 +74,14 @@ typedef struct GameBoard {
     int tick_timer;
 } GameBoard;
 
-// ========= VARIABLES GLOBALES =========
+// variables globales
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 GameBoard* game_board = NULL;
 
-// ========= EJERCICIO 1: STRINGS (NO USAR string.h) =========
+// ejercicio 1: strings (no usar string.h)
 
-// Cuenta los caracteres hasta el '\0' (sin contarlo). La usamos en las tres funciones.
+// cuenta los caracteres hasta el '\0' (sin contarlo). la usamos en las tres funciones.
 static int largo(char* s) {
     int n = 0;
     while (s[n] != '\0') n++;
@@ -121,9 +121,9 @@ char* strConcatenate(char* src1, char* src2) {
     return res;
 }
 
-// ========= EJERCICIO 2: FUNCIONES A IMPLEMENTAR (EL TP) =========
+// ejercicio 2: funciones a implementar (el tp)
 
-// Reserva una fila con todas las celdas en 0. Devuelve NULL si malloc falla.
+// reserva una fila con todas las celdas en 0. devuelve NULL si malloc falla.
 static RowNode* crearFilaVacia() {
     RowNode* fila = (RowNode*)malloc(sizeof(RowNode));
     if (fila == NULL) return NULL;
@@ -151,7 +151,7 @@ GameBoard* gameBoardNew() {
     board->score = 0;
     board->tick_timer = 0;
 
-    // Armamos la lista insertando siempre en la cabeza: asi no hace falta
+    // armamos la lista insertando siempre en la cabeza: asi no hace falta
     // guardar un puntero a la cola y la lista parcial queda siempre bien formada,
     // entonces si un malloc falla en el medio alcanza con borrar lo que ya hay.
     for (int i = 0; i < GRID_ROWS; i++) {
@@ -169,7 +169,7 @@ GameBoard* gameBoardNew() {
 void gameBoardDelete(GameBoard* board) {
     if (board == NULL) return;
 
-    // en los tres recorridos nos guardamos el next ANTES del free, despues no se puede leer
+    // en los tres recorridos nos guardamos el next antes del free, despues no se puede leer
     RowNode* fila = board->first_row;
     while (fila != NULL) {
         RowNode* sig = fila->next;
@@ -205,14 +205,14 @@ void gameBoardAddParticle(GameBoard* board, float x, float y, int color) {
     nueva->color = color;
     nueva->life_timer = 30 + (rand() % 30);
 
-    // insercion en la cabeza: O(1), y el orden de las particulas no importa
+    // insercion en la cabeza: o(1), y el orden de las particulas no importa
     nueva->next = board->first_particle;
     board->first_particle = nueva;
 }
 
 int gameBoardCheckAndClearLines(GameBoard* board) {
     int eliminadas = 0;
-    int indice = 0;   // posicion ORIGINAL de la fila que estamos mirando
+    int indice = 0;   // posicion original de la fila que estamos mirando
     RowNode* prev = NULL;
     RowNode* curr = board->first_row;
 
@@ -229,12 +229,12 @@ int gameBoardCheckAndClearLines(GameBoard* board) {
             continue;
         }
 
-        // Pedimos la fila de reemplazo antes de tocar nada: si falla, dejamos el tablero
+        // pedimos la fila de reemplazo antes de tocar nada: si falla, dejamos el tablero
         // como esta (20 filas) en vez de quedarnos con 19.
         RowNode* vacia = crearFilaVacia();
         if (vacia == NULL) break;
 
-        // Una particula por celda. La y usa el indice original: al sacar una fila y
+        // una particula por celda. la y usa el indice original: al sacar una fila y
         // meter otra arriba, las filas de abajo no cambian de posicion, asi que sigue valiendo.
         for (int c = 0; c < GRID_COLS; c++) {
             gameBoardAddParticle(board,
@@ -243,21 +243,21 @@ int gameBoardCheckAndClearLines(GameBoard* board) {
                                  curr->cells[c]);
         }
 
-        // Desenlazar: si es la primera, se mueve first_row; si no, el anterior salta a curr->next.
+        // desenlazar: si es la primera, se mueve first_row; si no, el anterior salta a curr->next.
         RowNode* a_borrar = curr;
         curr = curr->next;
         if (prev == NULL) board->first_row = curr;
         else prev->next = curr;
         free(a_borrar);
 
-        // La fila nueva va a la cabeza. Ya actualizamos first_row arriba, asi que
+        // la fila nueva va a la cabeza. ya actualizamos first_row arriba, asi que
         // tambien anda cuando la que se borro era la primera.
         vacia->next = board->first_row;
         board->first_row = vacia;
 
-        // Si borramos la primera, prev seguia en NULL pero ahora la cabeza es la fila nueva:
+        // si borramos la primera, prev seguia en NULL pero ahora la cabeza es la fila nueva:
         // la dejamos como prev, si no el proximo desenlace pisaria first_row y perderiamos la fila nueva.
-        // Si prev no era NULL no hay que tocarlo, sigue siendo el nodo anterior a curr.
+        // si prev no era NULL no hay que tocarlo, sigue siendo el nodo anterior a curr.
         if (prev == NULL) prev = vacia;
 
         eliminadas++;
@@ -271,7 +271,7 @@ void gameBoardEnqueuePiece(GameBoard* board, int type) {
     nodo->type = type;
     nodo->next = NULL;
 
-    // cola vacia: el nodo es a la vez head y tail. Si no, se cuelga detras del tail.
+    // cola vacia: el nodo es a la vez head y tail. si no, se cuelga detras del tail.
     if (board->queue_tail == NULL) {
         board->queue_head = nodo;
     } else {
@@ -292,7 +292,7 @@ int gameBoardDequeuePiece(GameBoard* board, int* out_type) {
     return 1;
 }
 
-// ========= LOGICA DE DIBUJADO Y COLISIONES (NO MODIFICAR) =========
+// logica de dibujado y colisiones (no modificar)
 
 RowNode* getRowAt(GameBoard* board, int index) {
     RowNode* curr = board->first_row;
@@ -331,7 +331,7 @@ void lockPiece(GameBoard* board) {
     board->score += gameBoardCheckAndClearLines(board) * 100;
 }
 
-// Devuelve 0 si la pieza nueva no entra (GAME OVER), 1 en otro caso.
+// devuelve 0 si la pieza nueva no entra (game over), 1 en otro caso.
 int spawnNextPiece(GameBoard* board) {
     int type;
     if (gameBoardDequeuePiece(board, &type)) {
@@ -350,7 +350,7 @@ int spawnNextPiece(GameBoard* board) {
     return 1;
 }
 
-// Devuelve 0 cuando termina la partida.
+// devuelve 0 cuando termina la partida.
 int gameBoardUpdate(GameBoard* board) {
     if (!board) return 0;
     if (!board->current_piece.active && !spawnNextPiece(board)) return 0;
@@ -454,7 +454,7 @@ int inicializar() {
     return 1;
 }
 
-// ========= TESTS =========
+// tests
 
 static int tests_ok = 0;
 static int tests_fallidos = 0;
@@ -468,7 +468,7 @@ static void chequear(int condicion, char* descripcion) {
     }
 }
 
-// Cuenta las filas de la lista (tiene que dar siempre 20)
+// cuenta las filas de la lista (tiene que dar siempre 20)
 static int contarFilas(GameBoard* board) {
     int n = 0;
     for (RowNode* f = board->first_row; f != NULL; f = f->next) n++;
@@ -600,7 +600,7 @@ static void testTablero() {
     gameBoardDelete(b);
 }
 
-// Casos extra: lo que hay arriba de una fila eliminada baja, y varias filas no contiguas.
+// casos extra: lo que hay arriba de una fila eliminada baja, y varias filas no contiguas.
 static void testTableroExtra() {
     GameBoard* b = gameBoardNew();
     if (b == NULL) { chequear(0, "extra: gameBoardNew"); return; }
@@ -650,7 +650,7 @@ void correrTests() {
     else printf("Tests: %d OK, %d FALLARON.\n", tests_ok, tests_fallidos);
 }
 
-// Compara contra "--test" sin depender de string.h ni del Ejercicio 1.
+// compara contra "--test" sin depender de string.h ni del ejercicio 1.
 int esFlagTest(char* arg) {
     char* flag = "--test";
     int i = 0;
@@ -661,8 +661,8 @@ int esFlagTest(char* arg) {
 int main(int argc, char* args[]) {
     srand(time(NULL));
 
-    // Los tests corren antes de SDL. Con --test termina aca, asi valgrind solo
-    // reporta la memoria del TP (SDL tiene bloques propios que no se liberan).
+    // los tests corren antes de SDL. con --test termina aca, asi valgrind solo
+    // reporta la memoria del tp (SDL tiene bloques propios que no se liberan).
     correrTests();
     if (argc > 1 && esFlagTest(args[1])) return 0;
 
