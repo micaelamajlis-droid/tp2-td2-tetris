@@ -1,5 +1,5 @@
 // tp2 - tecnologia digital ii - tetris con memoria dinamica
-// integrantes: Esther Meta Phinhassoff, Micaela Majlis, Felicitas Robin, Delfina Mengochea
+// integrantes: Micaela Majlis, Esther Meta Phinhassoff, Felicitas Robin, Delfina Mengochea
 //
 // uso:  ./tetris           corre los tests y despues el juego
 //       ./tetris --test    corre solo los tests (valgrind --leak-check=full ./tetris --test)
